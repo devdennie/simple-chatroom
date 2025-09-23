@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";   
-$db   = "chatroom";   
+$db   = "chatroom_db";   
 $user = "root";       
 $pass = "";            
 $charset = "utf8mb4";  
@@ -18,3 +18,4 @@ try {
 } catch (\PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
+
