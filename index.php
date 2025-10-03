@@ -98,15 +98,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <h1>Welcome to Simple Chatroom</h1>
-    <p>Enter your Gmail to sign in or register.</p>
+    <p>Enter your Gmail and password to sign in or register.</p>
     <?php if (isset($error)): ?>
-        <p style="color: red;"><?php echo $error; ?></p>
+        <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
     <form method="POST" action="">
         <label for="email">Gmail Address:</label><br><br>
         <input type="email" id="email" name="email" placeholder="example@gmail.com" required style="padding: 10px; width: 250px;"><br><br>
+        
+        <label for="password">Password:</label><br><br>
+        <input type="password" id="password" name="password" placeholder="Enter password (new: leave blank for default '12345')" style="padding: 10px; width: 250px;"><br><br>
+        
+        <label><input type="checkbox" name="use_default" <?php echo empty($_POST['password']) ? 'checked' : ''; ?>> Use default password '12345' (for new users)</label><br><br>
+        
         <input type="submit" value="Sign In / Register" style="padding: 10px 20px;">
     </form>
-    <p><small>New users get a random username and default password "12345".</small></p>
+    <p><small>New users get a random username. Change password/username in profile!</small></p>
 </body>
 </html>
