@@ -8,6 +8,15 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Update last_active on page load
+try {
+    $pdo = getPDO();
+    $update_stmt = $pdo->prepare("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?");
+    $update_stmt->execute([$_SESSION['user_id']]);
+} catch (PDOException $e) {
+    // Silent fail for now
+}
+
 // Display flash message if set
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
 unset($_SESSION['message']);
@@ -20,55 +29,109 @@ ini_set('display_errors', 1);
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="chat.css">
     <meta charset="UTF-8">
     <title>Simple Chatroom</title>
-    <style>
-        body { font-family: Arial; margin: 20px; }
-        #messages { border: 1px solid #ccc; height: 400px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
-        #message_input { width: 70%; padding: 10px; }
-        button { padding: 10px; }
-        .message { margin: 5px 0; }
-        .username { font-weight: bold; color: blue; }
-        .timestamp { font-size: small; color: gray; }
-        .flash { color: green; text-align: center; }
-    </style>
 </head>
 <body>
-    <h1>Chatroom</h1>
-    <p>Welcome, <span class="username"><?php echo htmlspecialchars($_SESSION['username']); ?></span>! 
-       <a href="profile.php">Profile (Change Password)</a> | 
-       <a href="logout.php">Logout</a></p>
+    <div class="navbar">
+        <a href="profile.php">Profile</a>
+        <a href="logout.php">Logout</a>
+        <button class="mode-toggle" onclick="toggleMode()" id="mode-toggle">🌙</button>
+    </div>
     
-    <?php if ($message): ?>
-        <p class="flash"><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
-    
-    <div id="messages"></div>
-    <input type="text" id="message_input" placeholder="Type a message..." maxlength="500">
-    <button onclick="sendMessage()">Send</button>
+    <div class="main-chat">
+        <h1>Chatroom</h1>
+        <?php if ($message): ?>
+            <p class="flash"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
+        
+        <div id="chat-container">
+            <div class="messages-section">
+                <div id="messages"></div>
+                <div class="input-row">
+                    <input type="text" id="message_input" placeholder="Type a message..." maxlength="500">
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+            
+            <div id="user-activity">
+                <h3>Online Users</h3>
+                <div id="online-list"></div>
+            </div>
+        </div>
+    </div>
     
     <script>
-        // Load initial messages
+        let pollInterval;
+        
+        // Load initial messages and users
         loadMessages();
+        loadActiveUsers();
         
         // Poll for new messages every 3 seconds
-        setInterval(loadMessages, 3000);
+        pollInterval = setInterval(loadMessages, 3000);
+        setInterval(loadActiveUsers, 5000); // Poll users every 5s
         
-        function loadMessages() {
-            fetch('get_messages.php')
+        function loadMessages(offset = 0) {
+            fetch(`get_messages.php?offset=${offset}`)
                 .then(response => response.json())
                 .then(data => {
                     const messagesDiv = document.getElementById('messages');
+                    if (data.error) {
+                        alert('Error loading messages: ' + data.error);
+                        return;
+                    }
                     messagesDiv.innerHTML = '';  // Clear and rebuild
                     data.forEach(msg => {
+                        const avatarInitial = msg.username.charAt(0).toUpperCase();
                         const msgDiv = document.createElement('div');
                         msgDiv.className = 'message';
-                        msgDiv.innerHTML = `<span class="username">${msg.username}:</span> ${msg.message} <span class="timestamp">${msg.timestamp}</span>`;
+                        msgDiv.innerHTML = `
+                            <div class="avatar">${avatarInitial}</div>
+                            <span class="username">${msg.username}:</span>
+                            <div class="message-content">${msg.message}</div>
+                            <span class="timestamp">${msg.timestamp}</span>
+                        `;
                         messagesDiv.appendChild(msgDiv);
                     });
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Auto-scroll to bottom
                 })
-                .catch(error => console.error('Error loading messages:', error));
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    alert('Failed to load messages. Please refresh the page.');
+                });
+        }
+        
+        function loadActiveUsers() {
+            fetch('get_active_users.php')
+                .then(response => response.json())
+                .then(data => {
+                    const listDiv = document.getElementById('online-list');
+                    if (data.error) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Error loading users</p>';
+                        return;
+                    }
+                    listDiv.innerHTML = '';
+                    if (data.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No users online</p>';
+                        return;
+                    }
+                    data.forEach(user => {
+                        const avatarInitial = user.username.charAt(0).toUpperCase();
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'online-user';
+                        userDiv.innerHTML = `
+                            <div class="avatar">${avatarInitial}</div>
+                            <span>${user.username}</span>
+                        `;
+                        listDiv.appendChild(userDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading active users:', error);
+                    document.getElementById('online-list').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Error loading users</p>';
+                });
         }
         
         function sendMessage() {
@@ -90,12 +153,37 @@ ini_set('display_errors', 1);
                     alert('Error sending message: ' + result);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Check connection and try again.');
+            });
         }
         
         // Send on Enter key
         document.getElementById('message_input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Clear interval on page unload (optional, for cleanup)
+        window.addEventListener('beforeunload', () => clearInterval(pollInterval));
+        
+        // Theme Toggle Functionality
+        function toggleMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('mode-toggle').textContent = isDark ? '☀️' : '🌙';
+        }
+        
+        // Load saved theme on page load
+        window.addEventListener('load', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('mode-toggle').textContent = '☀️';
+            } else {
+                document.getElementById('mode-toggle').textContent = '🌙';
+            }
         });
     </script>
 </body>
