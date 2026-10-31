@@ -30,7 +30,18 @@ function getPDO() {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {
-        die("Connection failed: " . $e->getMessage());
+        // The exception names the host and database account. Log it; the browser gets a generic line.
+        error_log('Database connection failed: ' . $e->getMessage());
+        $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+        $jsonEndpoints = ['get_messages.php', 'get_active_users.php', 'is_default.php'];
+        if (in_array($script, $jsonEndpoints, true)) {
+            if (!headers_sent()) {
+                header('Content-Type: application/json');
+            }
+            echo json_encode(['error' => 'Database connection failed.']);
+            exit();
+        }
+        die('Database connection failed.');
     }
 }
 ?>

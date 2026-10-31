@@ -107,7 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } catch (PDOException $e) {
-            $error = "Database error: " . $e->getMessage();
+            error_log('index.php: ' . $e->getMessage());
+            $error = "A database error occurred. Please try again.";
         }
     }
 }

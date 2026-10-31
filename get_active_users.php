@@ -16,6 +16,8 @@ try {
     
     echo json_encode($users);
 } catch (PDOException $e) {
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    // Do not send the driver message to the browser; it can reveal the schema.
+    error_log('get_active_users.php: ' . $e->getMessage());
+    echo json_encode(['error' => 'Unable to load users.']);
 }
 ?>
