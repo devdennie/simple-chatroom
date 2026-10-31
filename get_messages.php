@@ -23,8 +23,8 @@ try {
     echo json_encode($messages);
     
 } catch (PDOException $e) {
-    // Log the full error for debugging (check your PHP error log)
-    error_log('get_messages.php Error: ' . $e->getMessage() . ' | Query: ' . $stmt->queryString ?? 'N/A');
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+    // Driver text includes SQLSTATE and schema details. Keep it in the log.
+    error_log('get_messages.php: ' . $e->getMessage());
+    echo json_encode(['error' => 'Unable to load messages.']);
 }
 ?>
