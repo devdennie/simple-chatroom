@@ -1,2 +1,10 @@
 # Machine-local database credentials. See config.example.php.
 config.local.php
+
+# OS, editors, dependencies, and logs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+vendor/
+*.log

@@ -35,6 +35,10 @@ $stored_hash = $current_user['password'];
 $current_username = $current_user['username'];
 $is_default = (int)$current_user['is_default_password'];
 
+// Sign-in and the chat gate store the "change the default password" prompt here.
+$flash = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+unset($_SESSION['message']);
+
 // Handle form submission
 $success = '';
 $error = '';
@@ -97,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } catch (PDOException $e) {
-            $error = "Database error: " . $e->getMessage();
+            error_log('profile.php: ' . $e->getMessage());
+            $error = "A database error occurred. Please try again.";
         }
     }
 }
@@ -119,13 +124,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <div class="profile-container">
         <h1>Profile Settings</h1>
-        <p>Current Username: <strong><?php echo htmlspecialchars($current_username); ?></strong></p>
+        <?php if ($flash): ?>
+            <p class="flash"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php endif; ?>
+        <p>Current Username: <strong><?php echo htmlspecialchars($current_username, ENT_QUOTES, 'UTF-8'); ?></strong></p>
         
         <?php if ($error): ?>
-            <p class="error"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?php echo htmlspecialchars($success); ?></p>
+            <p class="success"><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         
         <form method="POST" action="">
@@ -140,7 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div id="username_field">
                 <label>New Username (optional, if default password):</label>
-                <input type="text" name="new_username" value="<?php echo htmlspecialchars($current_username); ?>" maxlength="100">
+                <?php /* Username is user-controlled, so escape it inside this attribute. */ ?>
+                <input type="text" name="new_username" value="<?php echo htmlspecialchars($current_username, ENT_QUOTES, 'UTF-8'); ?>" maxlength="100">
                 <small>Leave blank to keep current.</small>
             </div>
             

@@ -6,8 +6,8 @@ A small browser chatroom built for an Internet Technology course assessment. The
 
 - Sign in with an email address. If the email is new, an account is created.
 - New accounts get a random username made from an adjective, a noun, and a number (for example `SwiftEagle117`).
-- Leaving the password blank on registration stores a bcrypt hash of `12345` and sets `is_default_password` to 1. On a later visit, leaving the password blank signs that account in. Typing a password always checks it with `password_verify`.
-- The server ignores the "use default password" checkbox. An empty password field is what selects the default-password path.
+- Leaving the password blank on registration stores a bcrypt hash of `12345` and sets `is_default_password` to 1. Signing in always checks the password with `password_verify`, including that default. While the flag is still set, the account is sent to the profile page to change the password before the chat opens.
+- The server ignores the "use default password" checkbox. An empty password field on registration is what selects the default-password path.
 - While an account still has the default-password flag, its username can be changed once from the profile page. Changing the password clears the flag and locks the username.
 - Messages are loaded by polling `get_messages.php` every 3 seconds (latest 50 messages, room 1 only). Sending a message posts to `send_message.php` (500 character limit).
 - The sidebar lists users whose `last_active` timestamp is within the last 5 minutes. That list refreshes every 5 seconds.
@@ -55,23 +55,25 @@ Every account in the dump uses the password `demo1234`. These rows have `is_defa
 
 The sample messages already in the room were posted by RandomUser123, HappyStar947, SwiftEagle117, and RedEagle910. One older message is stored under the display name `RandomUser 123` (with a space); the account username has no space.
 
-To try registration instead, submit any other email address. Leave the password blank to get the default password `12345`, or type your own (at least the form will accept it; the profile page requires 5 characters when you change it later).
+To try registration instead, submit any other email address. Leave the password blank to get the default password `12345` (the app then asks you to change it before opening the chat), or type your own. The profile page requires 5 characters when you change a password later.
 
 ## Screenshots
 
-Add screenshots of the running app here:
+Sign-in page (`index.php`):
 
-- Sign-in page (`index.php`)
-- Chatroom with the message list and online users (`chat.php`)
-- Profile page (`profile.php`)
-
-Suggested paths, if you add image files later:
-
-```markdown
 ![Sign-in page](docs/screenshots/sign-in.png)
+
+Chatroom with the message list and online users (`chat.php`), signed in as `random.user@example.com`:
+
 ![Chatroom](docs/screenshots/chatroom.png)
+
+Profile page (`profile.php`):
+
 ![Profile](docs/screenshots/profile.png)
-```
+
+## Security notes
+
+Usernames and messages are inserted as text, so stored HTML is not executed. Sign-in always verifies the password, and an account still on the default password must change it before the chat opens. Database errors are written with `error_log`; the browser only receives a generic message.
 
 ## License
 
