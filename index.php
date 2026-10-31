@@ -122,7 +122,7 @@ display_form:
         <h1>Welcome to Dennie's Chatroom</h1>
         <p>Enter your Gmail to sign in or register.</p>
         <?php if (isset($error)): ?>
-            <p class="error"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <form method="POST" action="">
             <label for="email">Gmail Address:</label>

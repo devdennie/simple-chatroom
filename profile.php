@@ -119,13 +119,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <div class="profile-container">
         <h1>Profile Settings</h1>
-        <p>Current Username: <strong><?php echo htmlspecialchars($current_username); ?></strong></p>
+        <p>Current Username: <strong><?php echo htmlspecialchars($current_username, ENT_QUOTES, 'UTF-8'); ?></strong></p>
         
         <?php if ($error): ?>
-            <p class="error"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <?php if ($success): ?>
-            <p class="success"><?php echo htmlspecialchars($success); ?></p>
+            <p class="success"><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         
         <form method="POST" action="">
@@ -140,7 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div id="username_field">
                 <label>New Username (optional, if default password):</label>
-                <input type="text" name="new_username" value="<?php echo htmlspecialchars($current_username); ?>" maxlength="100">
+                <?php /* Username is user-controlled, so escape it inside this attribute. */ ?>
+                <input type="text" name="new_username" value="<?php echo htmlspecialchars($current_username, ENT_QUOTES, 'UTF-8'); ?>" maxlength="100">
                 <small>Leave blank to keep current.</small>
             </div>
             
