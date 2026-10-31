@@ -55,11 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
             
             if ($user) {
-                // Existing user: Login (check password if not default)
-                if ($user['is_default_password'] && empty($password)) {
-                    // Default login
-                } elseif (!password_verify($password, $user['password'])) {
-                    $error = "Incorrect password!";
+                // A blank password used to skip password_verify when
+                // is_default_password was set, which signed anyone in.
+                // Always require the password and check it against the hash.
+                $matches = password_verify($password, $user['password']);
+                if ($password === '' || !$matches) {
+                    $error = $password === '' ? "Password is required!" : "Incorrect password!";
                     goto display_form;
                 }
                 
@@ -71,6 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Update last_active
                 $update_stmt = $pdo->prepare("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?");
                 $update_stmt->execute([$user['id']]);
+                
+                if ((int) $user['is_default_password'] === 1) {
+                    // Default password 12345 matched. Send them to change it
+                    // before the chat opens.
+                    $_SESSION['message'] = "You are using the default password. Please change it before using the chat.";
+                    header('Location: profile.php');
+                    exit();
+                }
                 
                 $_SESSION['message'] = "Welcome back!";
                 header('Location: chat.php');

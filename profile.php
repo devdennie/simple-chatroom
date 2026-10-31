@@ -35,6 +35,10 @@ $stored_hash = $current_user['password'];
 $current_username = $current_user['username'];
 $is_default = (int)$current_user['is_default_password'];
 
+// Sign-in and the chat gate store the "change the default password" prompt here.
+$flash = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+unset($_SESSION['message']);
+
 // Handle form submission
 $success = '';
 $error = '';
@@ -119,6 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <div class="profile-container">
         <h1>Profile Settings</h1>
+        <?php if ($flash): ?>
+            <p class="flash"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php endif; ?>
         <p>Current Username: <strong><?php echo htmlspecialchars($current_username, ENT_QUOTES, 'UTF-8'); ?></strong></p>
         
         <?php if ($error): ?>
