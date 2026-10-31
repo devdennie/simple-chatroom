@@ -11,6 +11,18 @@ if (!isset($_SESSION['user_id'])) {
 // Update last_active on page load
 try {
     $pdo = getPDO();
+    $flag_stmt = $pdo->prepare("SELECT is_default_password FROM users WHERE id = ?");
+    $flag_stmt->execute([$_SESSION['user_id']]);
+    $flag_row = $flag_stmt->fetch();
+    if ($flag_row && (int) $flag_row['is_default_password'] === 1) {
+        // Password was verified at sign-in. Keep chat closed until they
+        // replace the default password. Leave an existing prompt in place.
+        if (empty($_SESSION['message'])) {
+            $_SESSION['message'] = "Please change the default password before using the chat.";
+        }
+        header('Location: profile.php');
+        exit();
+    }
     $update_stmt = $pdo->prepare("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?");
     $update_stmt->execute([$_SESSION['user_id']]);
 } catch (PDOException $e) {
