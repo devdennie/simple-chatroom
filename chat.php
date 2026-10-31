@@ -43,7 +43,7 @@ ini_set('display_errors', 1);
     <div class="main-chat">
         <h1>Chatroom</h1>
         <?php if ($message): ?>
-            <p class="flash"><?php echo htmlspecialchars($message); ?></p>
+            <p class="flash"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         
         <div id="chat-container">
@@ -84,15 +84,29 @@ ini_set('display_errors', 1);
                     }
                     messagesDiv.innerHTML = '';  // Clear and rebuild
                     data.forEach(msg => {
-                        const avatarInitial = msg.username.charAt(0).toUpperCase();
+                        // textContent, not innerHTML: username and message are stored
+                        // user input, and innerHTML would run that HTML (stored XSS).
+                        const username = msg.username == null ? '' : String(msg.username);
                         const msgDiv = document.createElement('div');
                         msgDiv.className = 'message';
-                        msgDiv.innerHTML = `
-                            <div class="avatar">${avatarInitial}</div>
-                            <span class="username">${msg.username}:</span>
-                            <div class="message-content">${msg.message}</div>
-                            <span class="timestamp">${msg.timestamp}</span>
-                        `;
+
+                        const avatar = document.createElement('div');
+                        avatar.className = 'avatar';
+                        avatar.textContent = username.charAt(0).toUpperCase();
+
+                        const usernameEl = document.createElement('span');
+                        usernameEl.className = 'username';
+                        usernameEl.textContent = username + ':';
+
+                        const content = document.createElement('div');
+                        content.className = 'message-content';
+                        content.textContent = msg.message == null ? '' : String(msg.message);
+
+                        const timestamp = document.createElement('span');
+                        timestamp.className = 'timestamp';
+                        timestamp.textContent = msg.timestamp == null ? '' : String(msg.timestamp);
+
+                        msgDiv.append(avatar, usernameEl, content, timestamp);
                         messagesDiv.appendChild(msgDiv);
                     });
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Auto-scroll to bottom
@@ -118,13 +132,19 @@ ini_set('display_errors', 1);
                         return;
                     }
                     data.forEach(user => {
-                        const avatarInitial = user.username.charAt(0).toUpperCase();
+                        // Same as messages: display names are user-controlled.
+                        const username = user.username == null ? '' : String(user.username);
                         const userDiv = document.createElement('div');
                         userDiv.className = 'online-user';
-                        userDiv.innerHTML = `
-                            <div class="avatar">${avatarInitial}</div>
-                            <span>${user.username}</span>
-                        `;
+
+                        const avatar = document.createElement('div');
+                        avatar.className = 'avatar';
+                        avatar.textContent = username.charAt(0).toUpperCase();
+
+                        const name = document.createElement('span');
+                        name.textContent = username;
+
+                        userDiv.append(avatar, name);
                         listDiv.appendChild(userDiv);
                     });
                 })
