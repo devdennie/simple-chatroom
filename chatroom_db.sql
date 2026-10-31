@@ -1,3 +1,7 @@
+-- Sample/demo data only (not real accounts). Every users.password value is a
+-- bcrypt ($2y$10$) hash of the password demo1234. is_default_password is 0, so
+-- sign-in must supply that password; a blank password is accepted only when the flag is 1.
+
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
@@ -67,15 +71,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `username`, `is_default_password`, `created_at`, `last_active`) VALUES
-(1, 'test@gmail.com', 'example12345', 'RandomUser123', 1, '2025-09-23 23:43:43', '2025-10-06 15:28:02'),
-(2, 'dennis.kabaso03@gmail.com', '$2y$10$Ie9VoPVqqwHmCXkKGSfiRe5NlXqShy650NA.GN1ucas8VOtnDRHkm', 'HappyStar947', 1, '2025-09-24 00:39:27', '2025-10-06 15:28:02'),
-(3, 'phiriedith1010@gmail.com', '1234567', 'SwiftEagle117', 1, '2025-09-24 00:44:11', '2025-10-06 15:28:02'),
-(4, 'appleeater1@gmail.com', '$2y$10$7SySgjE4DXMSuv67bocJAeKa3R3goUke4lA2GIrdufmG72uxuv2pm', 'SmartWolf804', 1, '2025-09-24 14:04:53', '2025-10-06 15:28:02'),
-(5, 'pluto123@gmail.com', '$2y$10$6Aoz8XUJoxJ5j6w.0f0bFewSNU2c8iswSUgdCB4LmWehAPZA4jAXi', 'QuickTiger482', 1, '2025-10-01 10:54:41', '2025-10-06 15:28:02'),
-(6, 'chimchim@gmail.com', '', 'BraveEagle539', 1, '2025-10-01 10:55:46', '2025-10-06 15:28:27'),
-(7, 'sabrinazcat123@gmail.com', '$2y$10$C8j7lT1ujRdaYcnfGmnhceACL1Kuuw.bi38qnAZS53tgVrm1D4yZu', 'BraveTiger735', 1, '2025-10-03 01:01:42', '2025-10-06 15:28:02'),
-(8, 'happybird.123@gmail.com', '$2y$10$BvjdyHEzFUVeF7Cm0uq0l.sLQAcbPys/UbaCRoBp.EDr/BwISyhke', 'RedEagle528', 1, '2025-10-06 15:31:33', '2025-10-06 15:36:47'),
-(9, 'chomilover@gmail.com', '$2y$10$ZaMEHFi.pfKXt.dQAxg8FOsPMpwKGzLKXVXl5YDctk.cwfLaM0mRS', 'RedEagle910', 1, '2025-10-06 15:39:19', '2025-10-06 15:47:09');
+(1, 'random.user@example.com', '$2y$10$2L2ilXJBlAJoZXO0NCOpuO1IFsuOu/7t0FYGO.xL1298JGwIXXF6K', 'RandomUser123', 0, '2025-09-23 23:43:43', '2025-10-06 15:28:02'),
+(2, 'happy.star@example.com', '$2y$10$1JsfiCy9NKk3aq1Zoulp7ulGJ2lCs6CgNUsS5LDT6kbzdC7c9AlOW', 'HappyStar947', 0, '2025-09-24 00:39:27', '2025-10-06 15:28:02'),
+(3, 'swift.eagle@example.com', '$2y$10$/u/3t11dAaMX8nh71FqCuORE7nhS1dlpuoTMdulDXXEuEIr/YViYS', 'SwiftEagle117', 0, '2025-09-24 00:44:11', '2025-10-06 15:28:02'),
+(4, 'smart.wolf@example.com', '$2y$10$H29oA04vkSy69G7xqWUKGOayojqXnu6lac6PTJPzxUZ9IPl3SDRUu', 'SmartWolf804', 0, '2025-09-24 14:04:53', '2025-10-06 15:28:02'),
+(5, 'quick.tiger@example.com', '$2y$10$tWZMdyxrAuchB9nPBO9fP.HEC2wyGYWsJdSpiLXP7FNX8luz6Mhvy', 'QuickTiger482', 0, '2025-10-01 10:54:41', '2025-10-06 15:28:02'),
+(6, 'brave.eagle@example.com', '$2y$10$ODUOc6x2sqL0IuTP1c1ske.ruBkTweYj6DjflM.eJmJ/3U0ttBybS', 'BraveEagle539', 0, '2025-10-01 10:55:46', '2025-10-06 15:28:27'),
+(7, 'brave.tiger@example.com', '$2y$10$rV2oG5d/t/UgKWLLOMLTXuFcvRHU51K.ua9t1EhHb/HlRFMK/XHkO', 'BraveTiger735', 0, '2025-10-03 01:01:42', '2025-10-06 15:28:02'),
+(8, 'red.eagle@example.com', '$2y$10$32aLrm6w2Y0uR0sBxBOUWeNi0WoDUZq9.cp7iwo1xqcRW50LxE7qG', 'RedEagle528', 0, '2025-10-06 15:31:33', '2025-10-06 15:36:47'),
+(9, 'red.eagle910@example.com', '$2y$10$F8vDSo26/SCRUjo5viPRgeik92qoH1mHyJm7nxiX/6sQ8ED5MuO.K', 'RedEagle910', 0, '2025-10-06 15:39:19', '2025-10-06 15:47:09');
 
 --
 -- Indexes for dumped tables
