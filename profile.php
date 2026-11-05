@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_validate()) {
         $error = "All password fields are required!";
     } elseif ($new_pass !== $confirm_pass) {
         $error = "New passwords do not match!";
-    } elseif (strlen($new_pass) < 5) {
-        $error = "New password must be at least 5 characters!";
+    } elseif (strlen($new_pass) < 8) {
+        $error = "New password must be at least 8 characters!";
     } elseif (!password_verify($old_pass, $stored_hash)) {
         $error = "Incorrect old password!";
     } elseif ($new_username !== $current_username && strlen($new_username) < 3) {
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_validate()) {
             <input type="password" name="old_pass" required>
             
             <label>New Password:</label>
-            <input type="password" name="new_pass" required minlength="5">
+            <input type="password" name="new_pass" required minlength="8">
             
             <label>Confirm New Password:</label>
             <input type="password" name="confirm_pass" required>

@@ -83,8 +83,8 @@ unset($_SESSION['message']);
         pollInterval = setInterval(loadMessages, 3000);
         setInterval(loadActiveUsers, 5000); // Poll users every 5s
         
-        function loadMessages(offset = 0) {
-            fetch(`get_messages.php?offset=${offset}`)
+        function loadMessages() {
+            fetch('get_messages.php')
                 .then(response => response.json())
                 .then(data => {
                     const messagesDiv = document.getElementById('messages');

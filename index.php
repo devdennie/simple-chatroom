@@ -89,7 +89,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: chat.php');
                 exit();
             } else {
-                // New user: Register with defaults
+                // New user: Register with defaults. A supplied password must
+                // be at least 8 characters; blank still selects the default.
+                if (!empty($password) && strlen($password) < 8) {
+                    $error = "Password must be at least 8 characters!";
+                    goto display_form;
+                }
+
                 $random_username = generateRandomUsername($pdo);
                 $default_hash = password_hash('12345', PASSWORD_DEFAULT);
                 $pass_hash = empty($password) ? $default_hash : password_hash($password, PASSWORD_DEFAULT);
@@ -104,7 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['username'] = $random_username;
                     $_SESSION['is_default'] = $is_default;
                     session_regenerate_id(true);
-                    $_SESSION['message'] = "Welcome! Username: $random_username. " . (empty($password) ? "Default password: 12345. " : "") . "Change it in profile.";
+                    if ((int) $is_default === 1) {
+                        $_SESSION['message'] = "Welcome! Username: $random_username. Default password: 12345. Please change it before using the chat.";
+                        header('Location: profile.php');
+                        exit();
+                    }
+                    $_SESSION['message'] = "Welcome! Username: $random_username. Change it in profile.";
                     header('Location: chat.php');
                     exit();
                 } else {
@@ -145,9 +156,7 @@ display_form:
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
             
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Leave blank for default '12345' (new users)">
-            
-            <label><input type="checkbox" name="use_default" <?php echo empty($_POST['password']) ? 'checked' : ''; ?>> Use default password '12345' (for new users)</label>
+            <input type="password" id="password" name="password" placeholder="Blank for default 12345 (new users); otherwise at least 8 characters">
             
             <br><br>
             <input type="submit" value="Sign In / Register">

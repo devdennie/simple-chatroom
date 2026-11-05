@@ -44,7 +44,8 @@ if (!csrf_validate()) {
 }
 
 $message = trim($_POST['message'] ?? '');
-if (empty($message) || strlen($message) > 500) {
+$message_length = function_exists('mb_strlen') ? mb_strlen($message, 'UTF-8') : strlen($message);
+if (empty($message) || $message_length > 500) {
     echo 'Invalid message';
     exit();
 }
