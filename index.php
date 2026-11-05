@@ -1,10 +1,7 @@
 <?php
 include 'config.php';
-session_start();
-
-// Enable error reporting for development (remove in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -39,6 +36,12 @@ function generateRandomUsername($pdo) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        http_response_code(403);
+        $error = "Invalid request. Please reload the page and try again.";
+        goto display_form;
+    }
+
     $email = trim($_POST['email']);
     $password = trim($_POST['password'] ?? '');
     
@@ -68,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $email;
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['is_default'] = $user['is_default_password'];
+                session_regenerate_id(true);
                 
                 // Update last_active
                 $update_stmt = $pdo->prepare("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?");
@@ -85,7 +89,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: chat.php');
                 exit();
             } else {
-                // New user: Register with defaults
+                // New user: Register with defaults. A supplied password must
+                // be at least 8 characters; blank still selects the default.
+                if (!empty($password) && strlen($password) < 8) {
+                    $error = "Password must be at least 8 characters!";
+                    goto display_form;
+                }
+
                 $random_username = generateRandomUsername($pdo);
                 $default_hash = password_hash('12345', PASSWORD_DEFAULT);
                 $pass_hash = empty($password) ? $default_hash : password_hash($password, PASSWORD_DEFAULT);
@@ -99,7 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['email'] = $email;
                     $_SESSION['username'] = $random_username;
                     $_SESSION['is_default'] = $is_default;
-                    $_SESSION['message'] = "Welcome! Username: $random_username. " . (empty($password) ? "Default password: 12345. " : "") . "Change it in profile.";
+                    session_regenerate_id(true);
+                    if ((int) $is_default === 1) {
+                        $_SESSION['message'] = "Welcome! Username: $random_username. Default password: 12345. Please change it before using the chat.";
+                        header('Location: profile.php');
+                        exit();
+                    }
+                    $_SESSION['message'] = "Welcome! Username: $random_username. Change it in profile.";
                     header('Location: chat.php');
                     exit();
                 } else {
@@ -135,13 +151,12 @@ display_form:
             <p class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <form method="POST" action="">
+            <?php echo csrf_field(); ?>
             <label for="email">Gmail Address:</label>
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
             
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Leave blank for default '12345' (new users)">
-            
-            <label><input type="checkbox" name="use_default" <?php echo empty($_POST['password']) ? 'checked' : ''; ?>> Use default password '12345' (for new users)</label>
+            <input type="password" id="password" name="password" placeholder="Blank for default 12345, or 8+ characters">
             
             <br><br>
             <input type="submit" value="Sign In / Register">

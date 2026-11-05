@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
-session_start();
+require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -16,10 +17,6 @@ try {
 } catch (PDOException $e) {
     // Silent fail
 }
-
-// Enable error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 // Fetch current user data
 $stmt = $pdo->prepare("SELECT password, username, is_default_password FROM users WHERE id = ?");
@@ -42,7 +39,10 @@ unset($_SESSION['message']);
 // Handle form submission
 $success = '';
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_validate()) {
+    http_response_code(403);
+    $error = "Invalid request. Please reload the page and try again.";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old_pass = $_POST['old_pass'] ?? '';
     $new_pass = $_POST['new_pass'] ?? '';
     $confirm_pass = $_POST['confirm_pass'] ?? '';
@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "All password fields are required!";
     } elseif ($new_pass !== $confirm_pass) {
         $error = "New passwords do not match!";
-    } elseif (strlen($new_pass) < 5) {
-        $error = "New password must be at least 5 characters!";
+    } elseif (strlen($new_pass) < 8) {
+        $error = "New password must be at least 8 characters!";
     } elseif (!password_verify($old_pass, $stored_hash)) {
         $error = "Incorrect old password!";
     } elseif ($new_username !== $current_username && strlen($new_username) < 3) {
@@ -137,11 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         
         <form method="POST" action="">
+            <?php echo csrf_field(); ?>
             <label>Old Password:</label>
             <input type="password" name="old_pass" required>
             
             <label>New Password:</label>
-            <input type="password" name="new_pass" required minlength="5">
+            <input type="password" name="new_pass" required minlength="8">
             
             <label>Confirm New Password:</label>
             <input type="password" name="confirm_pass" required>

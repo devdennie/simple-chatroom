@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
-session_start();
+require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -32,10 +33,6 @@ try {
 // Display flash message if set
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
 unset($_SESSION['message']);
-
-// Enable error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 ?>
 
 <!DOCTYPE html>
@@ -75,6 +72,7 @@ ini_set('display_errors', 1);
     </div>
     
     <script>
+        const CSRF_TOKEN = <?php echo json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         let pollInterval;
         
         // Load initial messages and users
@@ -85,8 +83,8 @@ ini_set('display_errors', 1);
         pollInterval = setInterval(loadMessages, 3000);
         setInterval(loadActiveUsers, 5000); // Poll users every 5s
         
-        function loadMessages(offset = 0) {
-            fetch(`get_messages.php?offset=${offset}`)
+        function loadMessages() {
+            fetch('get_messages.php')
                 .then(response => response.json())
                 .then(data => {
                     const messagesDiv = document.getElementById('messages');
@@ -174,7 +172,7 @@ ini_set('display_errors', 1);
             fetch('send_message.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'message=' + encodeURIComponent(message)
+                body: 'message=' + encodeURIComponent(message) + '&csrf_token=' + encodeURIComponent(CSRF_TOKEN)
             })
             .then(response => response.text())
             .then(result => {
