@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
 require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -71,6 +72,7 @@ unset($_SESSION['message']);
     </div>
     
     <script>
+        const CSRF_TOKEN = <?php echo json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
         let pollInterval;
         
         // Load initial messages and users
@@ -170,7 +172,7 @@ unset($_SESSION['message']);
             fetch('send_message.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'message=' + encodeURIComponent(message)
+                body: 'message=' + encodeURIComponent(message) + '&csrf_token=' + encodeURIComponent(CSRF_TOKEN)
             })
             .then(response => response.text())
             .then(result => {

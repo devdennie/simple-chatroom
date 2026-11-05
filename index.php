@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
 require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -35,6 +36,12 @@ function generateRandomUsername($pdo) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        http_response_code(403);
+        $error = "Invalid request. Please reload the page and try again.";
+        goto display_form;
+    }
+
     $email = trim($_POST['email']);
     $password = trim($_POST['password'] ?? '');
     
@@ -133,6 +140,7 @@ display_form:
             <p class="error"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
         <form method="POST" action="">
+            <?php echo csrf_field(); ?>
             <label for="email">Gmail Address:</label>
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
             

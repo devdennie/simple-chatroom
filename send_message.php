@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
 require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -33,6 +34,12 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo 'Invalid request method';
+    exit();
+}
+
+if (!csrf_validate()) {
+    http_response_code(403);
+    echo 'Invalid CSRF token';
     exit();
 }
 

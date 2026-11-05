@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
 require_once 'session.php';
+require_once 'csrf.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -38,7 +39,10 @@ unset($_SESSION['message']);
 // Handle form submission
 $success = '';
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_validate()) {
+    http_response_code(403);
+    $error = "Invalid request. Please reload the page and try again.";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old_pass = $_POST['old_pass'] ?? '';
     $new_pass = $_POST['new_pass'] ?? '';
     $confirm_pass = $_POST['confirm_pass'] ?? '';
@@ -133,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         
         <form method="POST" action="">
+            <?php echo csrf_field(); ?>
             <label>Old Password:</label>
             <input type="password" name="old_pass" required>
             
