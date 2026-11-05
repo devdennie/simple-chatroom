@@ -1,6 +1,6 @@
 <?php
 include 'config.php';
-session_start();
+require_once 'session.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $email;
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['is_default'] = $user['is_default_password'];
+                session_regenerate_id(true);
                 
                 // Update last_active
                 $update_stmt = $pdo->prepare("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?");
@@ -95,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['email'] = $email;
                     $_SESSION['username'] = $random_username;
                     $_SESSION['is_default'] = $is_default;
+                    session_regenerate_id(true);
                     $_SESSION['message'] = "Welcome! Username: $random_username. " . (empty($password) ? "Default password: 12345. " : "") . "Change it in profile.";
                     header('Location: chat.php');
                     exit();

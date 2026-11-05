@@ -1,6 +1,6 @@
 <?php
 include 'config.php';
-session_start();
+require_once 'session.php';
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['is_default' => false]);
