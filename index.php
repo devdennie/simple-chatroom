@@ -2,10 +2,6 @@
 include 'config.php';
 session_start();
 
-// Enable error reporting for development (remove in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
     header('Location: chat.php');

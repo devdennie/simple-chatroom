@@ -17,10 +17,6 @@ try {
     // Silent fail
 }
 
-// Enable error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Fetch current user data
 $stmt = $pdo->prepare("SELECT password, username, is_default_password FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
