@@ -156,7 +156,7 @@ display_form:
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
             
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Blank for default 12345 (new users); otherwise at least 8 characters">
+            <input type="password" id="password" name="password" placeholder="Blank for default 12345, or 8+ characters">
             
             <br><br>
             <input type="submit" value="Sign In / Register">
